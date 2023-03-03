@@ -84,7 +84,6 @@ const CreateCollection: FC = () => {
             uri,
             name: collectionName,
             symbol: collectionSymbol,
-            description: `SFTix => Metadata upload for ${tourName} tour artwork`,
             sellerFeeBasisPoints,
             isCollection: true,
         }

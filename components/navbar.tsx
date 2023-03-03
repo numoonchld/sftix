@@ -13,7 +13,7 @@ const WalletMultiButtonDynamic = dynamic(
 const Navbar: FC = () => {
     return (
         <>
-            <nav className="navbar navbar-expand-md navbar-light bg-light mx-3">
+            <nav className="navbar navbar-expand-md navbar-light bg-light px-3">
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
