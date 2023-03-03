@@ -4,8 +4,6 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useState, useEffect } from "react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-declare const window: any;
-
 
 export default function Home() {
   const [balance, setBalance] = useState(0);
