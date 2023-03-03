@@ -4,6 +4,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useState, useEffect } from "react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import CreateCollection from "@/components/createCollection";
+import ViewCollections from "@/components/viewCollections";
 
 
 export default function Home() {
@@ -35,8 +36,8 @@ export default function Home() {
             Wallet Connected!
             <br />
             Wallet Balance: {balance / LAMPORTS_PER_SOL} SOL
+            <ViewCollections />
             <CreateCollection />
-
 
           </section>
         }
