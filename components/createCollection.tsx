@@ -95,23 +95,6 @@ const CreateCollection: FC = () => {
         console.log(
             `Token Mint: https://explorer.solana.com/address/${nft.address.toString()}?cluster=devnet`
         )
-        /*
-        {
-            "name": "Studious Crab Collection",
-                "symbol": "CRAB",
-                    "description": "Collection of 9 crabs seeking refuge from overfishing on the blockchain.",
-                        "image": "collection.png",
-                            "attributes": [],
-                                "properties": {
-                "files": [
-                    {
-                        "uri": "collection.png",
-                        "type": "image/png"
-                    }
-                ]
-            }
-        }
-        */
 
 
     }
@@ -124,7 +107,7 @@ const CreateCollection: FC = () => {
             <div className="card-body">
                 <h5 className="card-title">Create tour</h5>
                 <form onSubmit={handleCreateTourSubmit}>
-                    <div className="form-group mb-5">
+                    <div className="form-group mb-3">
                         <label
                             htmlFor="tourNameTextInput">
                             Tour name
@@ -138,13 +121,8 @@ const CreateCollection: FC = () => {
                             value={tourName}
                             onChange={e => setTourName(e.target.value)}
                         />
-                        {/* <small
-                            id="emailHelp"
-                            className="form-text text-muted">
-                            (Each tour is a Collection NFT)
-                        </small> */}
                     </div>
-                    <div className="form-group mb-5">
+                    <div className="form-group mb-3">
                         <label
                             htmlFor="artistNameTextInput">
                             Artist name
@@ -158,11 +136,6 @@ const CreateCollection: FC = () => {
                             value={artistName}
                             onChange={e => setArtistName(e.target.value)}
                         />
-                        {/* <small
-                            id="emailHelp"
-                            className="form-text text-muted">
-                            (Each tour is a Collection NFT)
-                        </small> */}
                     </div>
                     <div className="form-group mb-5">
                         <div className="custom-file row">
