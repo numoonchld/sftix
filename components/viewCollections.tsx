@@ -16,6 +16,16 @@ import {
     Sft,
 } from '@metaplex-foundation/js';
 
+interface CollectionPaneProps {
+    nftItem: Metadata<JsonMetadata<string>> | Nft | Sft
+}
+
+const CollectionPane: FC<CollectionPaneProps> = ({ nftItem }) => {
+    console.log(nftItem)
+    return <>
+    </>
+}
+
 const ViewCollections: FC = () => {
 
     const { connection } = useConnection();
@@ -63,7 +73,7 @@ const ViewCollections: FC = () => {
                 }
                 {allCreatedNFTsByCurrentWallet?.length === 0 && isLoadingNFTs === false
                     ? <p> No NFTs created by your wallet found! </p>
-                    : allCreatedNFTsByCurrentWallet?.map(nftItem => console.log(nftItem))
+                    : allCreatedNFTsByCurrentWallet?.map(nftItem => <CollectionPane nftItem={nftItem} />)
                 }
             </>
         </div>
