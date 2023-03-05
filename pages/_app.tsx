@@ -11,6 +11,8 @@ import '@/styles/globals.css'
 require("@solana/wallet-adapter-react-ui/styles.css");
 import type { AppProps } from 'next/app'
 
+import Layout from '../components/layout'
+
 export default function App({ Component, pageProps }: AppProps) {
   // Can be set to 'devnet', 'testnet', or 'mainnet-beta'
   const network = WalletAdapterNetwork.Devnet;
@@ -32,7 +34,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <Component {...pageProps} />
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
