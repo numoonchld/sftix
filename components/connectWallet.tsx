@@ -11,12 +11,13 @@ const WalletMultiButtonDynamic = dynamic(
 const ConnectWallet: FC = () => {
 
 
-    return <>            <div
-        className='w-100 d-flex justify-content-center align-items-center bg-white'
-        style={{ height: "91.5vh" }}
-    >
-        <WalletMultiButtonDynamic />
-    </div>
+    return <>
+        <div
+            className='w-100 d-flex justify-content-center align-items-center bg-white'
+            style={{ height: "94vh" }}
+        >
+            <WalletMultiButtonDynamic />
+        </div>
     </>;
 
 }
