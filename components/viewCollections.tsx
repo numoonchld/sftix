@@ -55,7 +55,7 @@ const CollectionPane: FC<CollectionPaneProps> = ({ nftItem }) => {
 
     console.log(`Token Mint: https://explorer.solana.com/address/${NFTMintAddress}?cluster=devnet`)
     return isSFTixCollectionItem ? <>
-        <div className="jumbotron p-3">
+        <div className="card p-3">
             <div className="d-flex flex-row">
                 <img
                     style={{ objectFit: "cover" }}

@@ -20,17 +20,17 @@ const Navbar: FC = () => {
                 <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
                     <Link className="navbar-brand" href="/">
                         <Image
-                            src="/logo-dark.png"
+                            src="/logo-color.png"
                             alt=""
-                            width="48"
-                            height="48"
+                            width="54"
+                            height="54"
                             className=""
                             priority
                         />
                     </Link>
                     <ul className="navbar-nav mr-auto mt-2 mt-lg-0">
                         <li className="nav-item active">
-                            <Link className="navbar-brand nav-link" href="/">
+                            <Link className="navbar-brand nav-link" href="/ticket-counter">
                                 Ticket counter
                             </Link>
                         </li>
