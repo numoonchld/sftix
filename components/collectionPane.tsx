@@ -1,6 +1,5 @@
-import Image from "next/image";
 import { FC, useState, useEffect } from "react"
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+
 import {
     bundlrStorage,
     keypairIdentity,
@@ -17,14 +16,9 @@ import {
     Sft,
 } from '@metaplex-foundation/js';
 
-import CollectionPane from "@/components/collectionPane";
-
-
-/*
 interface CollectionPaneProps {
     nftItem: Metadata
 }
-
 
 const CollectionPane: FC<CollectionPaneProps> = ({ nftItem }) => {
     console.log({ nftItem })
@@ -90,66 +84,6 @@ const CollectionPane: FC<CollectionPaneProps> = ({ nftItem }) => {
     </> : <></>
 
 }
-*/
 
-const ViewCollections: FC = () => {
 
-    const { connection } = useConnection();
-    const { publicKey, connected, wallet, sendTransaction } = useWallet();
-
-    const collectionAuthority = wallet?.adapter!
-    // console.log('Create collection | wallet public key: ', collectionAuthority.publicKey?.toBase58())
-
-    const metaplex = Metaplex.make(connection)
-        .use(
-            walletAdapterIdentity(collectionAuthority)
-        )
-        .use(
-            bundlrStorage(
-                {
-                    address: 'https://devnet.bundlr.network',
-                    providerUrl: 'https://api.devnet.solana.com',
-                    timeout: 60000,
-                }
-            )
-        )
-
-    const [allCreatedNFTsByCurrentWallet, setAllCreatedNFTsByCurrentWallet] = useState<(Metadata<JsonMetadata<string>> | Nft | Sft)[]>()
-    const [isLoadingNFTs, setIsLoadingNFTs] = useState(false)
-
-    const getAllSFTixCollectionsForWallet = async () => {
-        setIsLoadingNFTs(true)
-        const allCreatedNFTs = await metaplex.nfts().findAllByCreator({ creator: collectionAuthority.publicKey! });
-        console.log('all created nfts by current wallet: ', allCreatedNFTs)
-        setAllCreatedNFTsByCurrentWallet(allCreatedNFTs)
-        setIsLoadingNFTs(false)
-    }
-
-    useEffect(() => {
-        getAllSFTixCollectionsForWallet()
-    }, [connection, wallet])
-
-    return <>
-        <div className="card my-5">
-            <div className="card-header">
-                Tours registered with SFTix
-            </div>
-            <div className="card-body d-flex align-items-center justify-content-start ">
-                {isLoadingNFTs &&
-                    <div className="spinner-grow" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                }
-                {allCreatedNFTsByCurrentWallet?.length === 0 && isLoadingNFTs === false
-                    && <p> No NFTs created by your wallet found! </p>
-                }
-                {allCreatedNFTsByCurrentWallet?.length !== 0 && isLoadingNFTs === false
-                    // @ts-ignore
-                    && allCreatedNFTsByCurrentWallet?.map(nftItem => <CollectionPane nftItem={nftItem} />)
-                }
-            </div>
-        </div>
-    </>
-}
-
-export default ViewCollections
+export default CollectionPane
