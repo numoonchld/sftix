@@ -15,6 +15,7 @@ import {
     Nft,
     Sft,
 } from '@metaplex-foundation/js';
+import Link from "next/link";
 
 interface CollectionPaneProps {
     nftItem: Metadata
@@ -66,7 +67,11 @@ const CollectionPane: FC<CollectionPaneProps> = ({ nftItem }) => {
                 />
                 <div className="mx-3">
                     <h1 className="display-4">{tourSymbol}</h1>
-                    <p className="lead">{tourName}</p>
+                    <p className="lead">
+                        <Link href={`/tour-collections/${NFTMintAddress}`}>
+                            {tourName}
+                        </Link>
+                    </p>
                     <hr className="my-4" />
                     <p>{tourDescription}</p>
                     <p className="lead">
