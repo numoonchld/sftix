@@ -4,6 +4,7 @@ import ViewCollections from '@/components/viewCollections'
 import CreateCollection from '@/components/createCollection'
 import ConnectWallet from '@/components/connectWallet'
 import BalanceAlert from '@/components/balanceAlert';
+import OrganizerRegistration from '@/components/organizerRegistration';
 
 const OrganizerDashboard: FC = () => {
     const { connection } = useConnection();
@@ -14,6 +15,7 @@ const OrganizerDashboard: FC = () => {
         {connected &&
             <section className="container">
                 <BalanceAlert />
+                <OrganizerRegistration />
                 <ViewCollections />
                 <CreateCollection />
             </section>
