@@ -16,6 +16,8 @@ import {
     NftWithToken,
     Nft,
 } from '@metaplex-foundation/js';
+import { LoadingLight } from "./loading";
+
 
 interface Event<T = EventTarget> {
     target: T;
@@ -53,9 +55,10 @@ const CreateCollection: FC = () => {
         setTourArtworkFile(await toMetaplexFileFromBrowser(event.target.files![0]))
     }
 
+    const [isCreatingTour, setIsCreatingTour] = useState(false)
     const handleCreateTourSubmit = async (event: FormEvent) => {
         event.preventDefault()
-
+        setIsCreatingTour(true)
         /* create a collection NFT for each tour */
         const collectionName = `${tourName} - ${artistName}`
         const collectionSymbol = `${tourName.split(' ').map(piece => piece[0]).join('')}${artistName.split(' ').map(piece => piece[0]).join('')}`
@@ -96,6 +99,7 @@ const CreateCollection: FC = () => {
             `Token Mint: https://explorer.solana.com/address/${nft.address.toString()}?cluster=devnet`
         )
 
+        setIsCreatingTour(false)
 
     }
 
@@ -155,8 +159,11 @@ const CreateCollection: FC = () => {
                     </div>
                     <button
                         type="submit"
-                        className="btn btn-primary"
-                    >Create</button>
+                        className="btn btn-primary w-100"
+                    >
+                        {isCreatingTour && <LoadingLight />}
+                        {!isCreatingTour && `Create`}
+                    </button>
                 </form>
             </div>
         </div>

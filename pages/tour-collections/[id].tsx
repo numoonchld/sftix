@@ -117,8 +117,12 @@ const TourCollections: FC = () => {
             }, {
                 trait_type: "Event data",
                 value: `${eventDate}`
-
-            }]
+            },
+            {
+                trait_type: "Candy machine ID",
+                value: ""
+            }
+            ]
         }
         console.log({ eventSFTJSONMetadata })
 

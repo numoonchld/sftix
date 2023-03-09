@@ -1,4 +1,4 @@
-import { FC, useState } from "react"
+import { FC, useEffect, useState } from "react"
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { Program, AnchorProvider, web3 } from '@project-serum/anchor';
@@ -22,6 +22,7 @@ const OrganizerRegistration: FC = () => {
     const { connection } = useConnection();
     const { publicKey, connected, wallet, sendTransaction } = useWallet();
     const [mustDisableRegisterButton, setMustDisableRegisterButton] = useState(false)
+
 
     const getProvider = () => {
         // const connection = new Connection(network, opts.preflightCommitment);
@@ -48,6 +49,8 @@ const OrganizerRegistration: FC = () => {
         // console.log({ walletAddressesOnStorage, currentWalletAddress })
         // console.log(walletAddressesOnStorage.includes(currentWalletAddress))
 
+        console.log({ getProviderPublicKey: getProvider().publicKey.toString() })
+
         if (!(walletAddressesOnStorage.includes(currentWalletAddress))) {
             await program.rpc.registerEventOrganizer({
                 accounts: {
@@ -63,21 +66,41 @@ const OrganizerRegistration: FC = () => {
         }
     }
 
+    const fetchRegistrationData = async () => {
+        const program = await getProgram();
+        const account = await program.account.baseAccount.fetch(baseAccount.publicKey)
+        // @ts-ignore
+        const walletAddressesOnStorage = account.eventOrganizersVec.map((address: any) => address.toString())
+        const currentWalletAddress = publicKey?.toString()
+
+        if (!(walletAddressesOnStorage.includes(currentWalletAddress))) {
+            setMustDisableRegisterButton(false)
+        } else {
+            setMustDisableRegisterButton(true)
+        }
+
+    }
+
     // TO DO: Add useEffect to auto load registration status
+    useEffect(() => {
+        fetchRegistrationData()
+    }, [window.solana.publicKey.toString()])
 
     return <>
-        <div
-            className="card p-3">
+        {mustDisableRegisterButton ? null : <>
+
             <button
-                className="btn btn-success"
+                className="btn btn-success w-100"
                 onClick={handleEventOrganizerRegistration}
                 disabled={mustDisableRegisterButton}
             >
-                {mustDisableRegisterButton ? `Already registered!` : `Register`}
+                Register wallet
             </button>
 
-        </div>
+        </>
+        }
     </>
+
 }
 
 export default OrganizerRegistration
