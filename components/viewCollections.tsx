@@ -18,6 +18,7 @@ import {
 } from '@metaplex-foundation/js';
 
 import CollectionPane from "@/components/collectionPane";
+import Loading from "./loading";
 
 
 /*
@@ -134,14 +135,10 @@ const ViewCollections: FC = () => {
             <div className="card-header">
                 Tours registered with SFTix
             </div>
-            <div className="card-body d-flex align-items-center justify-content-start ">
-                {isLoadingNFTs &&
-                    <div className="spinner-grow" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                }
+            <div className="card-body d-flex flex-column align-items-center justify-content-start ">
+                {isLoadingNFTs && <Loading />}
                 {allCreatedNFTsByCurrentWallet?.length === 0 && isLoadingNFTs === false
-                    && <p> No NFTs created by your wallet found! </p>
+                    && <p> No tours created by your wallet found! </p>
                 }
                 {allCreatedNFTsByCurrentWallet?.length !== 0 && isLoadingNFTs === false
                     // @ts-ignore

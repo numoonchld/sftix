@@ -17,11 +17,19 @@ import {
 } from '@metaplex-foundation/js';
 import Link from "next/link";
 
-interface CollectionPaneProps {
-    nftItem: Metadata
+
+enum CollectionPaneFor {
+    TOUR,
+    EVENT,
 }
 
-const CollectionPane: FC<CollectionPaneProps> = ({ nftItem }) => {
+interface CollectionPaneProps {
+    nftItem: Metadata
+    collectionPaneFor: CollectionPaneFor
+
+}
+
+const CollectionPane: FC<CollectionPaneProps> = ({ nftItem, collectionPaneFor }) => {
     console.log({ nftItem })
     console.log('NFT mint address: ', nftItem.mintAddress.toString())
     const [isSFTixCollectionItem, setIsSFTixCollectionItem] = useState(false)
@@ -35,11 +43,11 @@ const CollectionPane: FC<CollectionPaneProps> = ({ nftItem }) => {
         const URIData = await fetch(nftItem.uri)
         const URIDataJSON = await URIData.json()
         console.log({ URIDataJSON })
-        const { description } = URIDataJSON
+        const { name, description } = URIDataJSON
 
-        console.log({ description })
+        console.log({ name, description })
 
-        if (description.split(" => ")[0] === "SFTix") {
+        if (name.substring(0, 3) !== 'SFT' && description.split(" => ")[0] === "SFTix") {
             setIsSFTixCollectionItem(true)
             setTourName(URIDataJSON.name)
             setTourSymbol(URIDataJSON.symbol)

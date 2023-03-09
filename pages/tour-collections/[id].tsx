@@ -1,6 +1,6 @@
-import { FC, useEffect, useState } from "react"
+import React, { FC, useEffect, FormEvent, useState } from "react"
 import { useRouter } from "next/router"
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { Connection, PublicKey, clusterApiUrl, } from '@solana/web3.js';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
     bundlrStorage,
@@ -16,7 +16,12 @@ import {
     MetaplexFile,
     NftWithToken,
     Nft,
+    Sft,
+    toBigNumber,
+    Metadata
 } from '@metaplex-foundation/js';
+import SFTPane from "@/components/SFTPane";
+import Loading, { LoadingLight } from "@/components/loading";
 
 interface Event<T = EventTarget> {
     target: T;
@@ -25,9 +30,8 @@ interface Event<T = EventTarget> {
 
 const TourCollections: FC = () => {
     const router = useRouter()
-    console.log(router)
     const { id: collectionID } = router.query
-    console.log(collectionID)
+
 
     const { connection } = useConnection();
     const { publicKey, connected, wallet, sendTransaction } = useWallet();
@@ -55,18 +59,97 @@ const TourCollections: FC = () => {
         setTourCollectionNFT(await metaplex.nfts().findByMint({ mintAddress: tourCollectionNFTMintAddress }));
     }
 
+    const [allCreatedNFTsByCurrentWallet, setAllCreatedNFTsByCurrentWallet] = useState<(Metadata<JsonMetadata<string>> | Nft | Sft)[]>()
+    const [onlySFTByCurrentWallet, setOnlySFTByCurrentWallet] = useState<(Metadata<JsonMetadata<string>> | Nft | Sft)[]>()
+    const [isLoadingSFTs, setIsLoadingSFTs] = useState(false)
+
+    const getAllSFTixCollectionsForWallet = async () => {
+        setIsLoadingSFTs(true)
+        const allCreatedNFTs = await metaplex.nfts().findAllByCreator({ creator: collectionAuthority.publicKey! });
+        console.log('all created nfts by current wallet: ', allCreatedNFTs)
+        const onlySFTFilter = allCreatedNFTs
+            .filter(
+                nftItem => nftItem.name.substring(0, 3) === 'SFT' && nftItem.symbol === tourCollectionNFT.symbol
+            )
+        console.log('all SFT by current wallet: ', onlySFTFilter)
+        setAllCreatedNFTsByCurrentWallet(allCreatedNFTs)
+        setOnlySFTByCurrentWallet(onlySFTFilter)
+        setIsLoadingSFTs(false)
+    }
+
     useEffect(() => {
         getTourCollectionNFTDetails()
     }, [])
+
     useEffect(() => {
-        console.log(tourCollectionNFT)
-        console.log(metaplex.identity())
+        console.log({ tourCollectionNFT })
+        console.log('metaplex identity: ', metaplex.identity())
+        getAllSFTixCollectionsForWallet()
+
     }, [tourCollectionNFT])
 
     const [eventLocation, setEventLocation] = useState('')
     const [eventDate, setEventDate] = useState('')
     const [eventCapacity, setEventCapacity] = useState('')
-    const handleCreateTourEventSubmit = () => {
+    const [isCreatingEvent, setIsCreatingEvent] = useState(false)
+
+    const handleCreateTourEventSubmit = async (event: FormEvent) => {
+        event.preventDefault()
+        setIsCreatingEvent(true)
+        console.log('Begin submitting new tour event!')
+        console.log(tourCollectionNFT.json)
+        console.log(eventLocation)
+        console.log(eventDate)
+        console.log(eventCapacity)
+
+        const eventName = `SFT / ${tourCollectionNFT.json.symbol} - ${eventLocation}`
+        const eventSymbol = `${tourCollectionNFT.json.symbol}`
+
+        // metadata for tour's collection-NFT
+        const eventSFTJSONMetadata: JsonMetadata = {
+            name: eventName,
+            symbol: eventSymbol,
+            description: `SFTix => Metadata upload for ${eventName} ticket SFT`,
+            image: tourCollectionNFT.json.image,
+            attributes: [{
+                trait_type: "Event location",
+                value: `${eventLocation}`
+            }, {
+                trait_type: "Event data",
+                value: `${eventDate}`
+
+            }]
+        }
+        console.log({ eventSFTJSONMetadata })
+
+        const { uri, metadata } = await metaplex
+            .nfts()
+            .uploadMetadata(eventSFTJSONMetadata);
+        console.log('Event SFT metadata and URI: ', uri, metadata)
+
+        // event's ticket-SFT
+        const createEventSFTInput: CreateSftInput = {
+            uri,
+            name: eventName,
+            symbol: eventSymbol,
+            sellerFeeBasisPoints: 333,
+            maxSupply: toBigNumber(eventCapacity),
+            collection: new PublicKey(collectionID!),
+            isCollection: true,
+            collectionAuthority: metaplex.identity(),
+
+        }
+
+        const { nft } = await metaplex
+            .nfts()
+            .create(createEventSFTInput)
+
+        console.log(
+            `Token Mint: https://explorer.solana.com/address/${nft.address.toString()}?cluster=devnet`
+        )
+
+        setIsCreatingEvent(false)
+        getAllSFTixCollectionsForWallet()
 
     }
     const getTodaysDate = () => {
@@ -76,15 +159,18 @@ const TourCollections: FC = () => {
         var yyyy = today.getFullYear();
 
         if (dd < 10) {
+            // @ts-ignore
             dd = '0' + dd;
         }
 
         if (mm < 10) {
+            // @ts-ignore
             mm = '0' + mm;
         }
 
         return `${yyyy}-${mm}-${dd}`
     }
+
     return <>
         <section
             className="d-flex flex-column align-items-center"
@@ -95,7 +181,6 @@ const TourCollections: FC = () => {
                         src={tourCollectionNFT.json.image}
                         width={250}
                         className="image-fluid"
-                        al
                     />
                     <h3>{tourCollectionNFT.json.name}</h3>
                     <small>
@@ -105,6 +190,14 @@ const TourCollections: FC = () => {
                     </small>
                     <hr />
 
+                    <div className="d-flex flex-column justify-content-center align-items-start w-100">
+                        <h4> <u> Events in this tour </u> </h4>
+                        {isLoadingSFTs && <Loading />}
+                        {onlySFTByCurrentWallet?.length === 0 && isLoadingSFTs === false
+                            && <p> No events have been created for this tour! </p>
+                        }
+                        {onlySFTByCurrentWallet?.map(SFT => <React.Fragment key={SFT.address.toString()}><SFTPane sftItem={SFT} /></React.Fragment>)}
+                    </div>
 
                 </div>
             }
@@ -121,14 +214,14 @@ const TourCollections: FC = () => {
                     <form onSubmit={handleCreateTourEventSubmit}>
                         <div className="form-group mb-3">
                             <label
-                                htmlFor="tourNameTextInput">
+                                htmlFor="locationNameTextInput">
                                 Event Location
                             </label>
                             <input
                                 type="text"
                                 className="form-control"
-                                id="tourNameTextInput"
-                                aria-describedby="emailHelp"
+                                id="locationNameTextInput"
+                                aria-describedby="locationName"
                                 placeholder=""
                                 value={eventLocation}
                                 onChange={e => setEventLocation(e.target.value)}
@@ -136,15 +229,15 @@ const TourCollections: FC = () => {
                         </div>
                         <div className="form-group mb-3">
                             <label
-                                htmlFor="artistNameTextInput">
+                                htmlFor="eventDateInput">
                                 Event date
                             </label>
                             <input
                                 type="date"
                                 min={getTodaysDate()}
                                 className="form-control"
-                                id="artistNameTextInput"
-                                aria-describedby="emailHelp"
+                                id="eventDateInput"
+                                aria-describedby="eventDate"
                                 placeholder=""
                                 value={eventDate}
                                 onChange={e => setEventDate(e.target.value)}
@@ -152,16 +245,31 @@ const TourCollections: FC = () => {
                         </div>
                         <div className="form-group mb-3">
                             <label
-                                htmlFor="artistNameTextInput">
-                                Event capactiy (6500 max)
+                                htmlFor="eventCapacityNumberInput">
+                                Event capacity (6500 max)
                             </label>
                             <input
                                 type="number"
                                 min="1"
                                 max="6500"
                                 className="form-control"
-                                id="artistNameTextInput"
-                                aria-describedby="emailHelp"
+                                id="eventCapacityNumberInput"
+                                aria-describedby="evnetCapacity"
+                                placeholder=""
+                                value={eventCapacity}
+                                onChange={e => setEventCapacity(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-group mb-3">
+                            <label
+                                htmlFor="entryFeeTextInput">
+                                Entry Fee (SOL per ticket)
+                            </label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="entryFeeTextInput"
+                                aria-describedby="entryFee"
                                 placeholder=""
                                 value={eventCapacity}
                                 onChange={e => setEventCapacity(e.target.value)}
@@ -170,8 +278,11 @@ const TourCollections: FC = () => {
 
                         <button
                             type="submit"
-                            className="btn btn-primary"
-                        >Create</button>
+                            className="btn btn-primary w-100"
+                        >
+                            {isCreatingEvent && <LoadingLight />}
+                            {!isCreatingEvent && `Create`}
+                        </button>
                     </form>
                 </div>
             </div>
