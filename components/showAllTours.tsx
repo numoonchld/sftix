@@ -20,6 +20,8 @@ import {
 
 
 import kp from '../public/assets/event-organizer-storage-account.json'
+import Loading from "./loading";
+import TourTicketCounter from "./tourTicketCounter";
 
 declare const window: any;
 
@@ -35,7 +37,7 @@ const commitment = 'processed'
 const ShowAllTours: FC = () => {
 
     const [allWalletAddressesOnStorage, setAllWalletAddressesOnStorage] = useState([])
-    const [allCollectionNFTs, setAllCollectionNFTs] = useState<(Metadata<JsonMetadata<string>> | Nft | Sft)[]>([])
+    const [allWalletNFTs, setAllWalletNFTs] = useState<(Metadata<JsonMetadata<string>> | Nft | Sft)[]>([])
 
     const { connection } = useConnection();
     const { publicKey, connected, wallet, sendTransaction } = useWallet();
@@ -55,18 +57,22 @@ const ShowAllTours: FC = () => {
         return new Program(idl!, programID, getProvider());
     };
 
+    const [isLoading, setIsLoading] = useState(false)
 
     const getAllWalletAddressesOnStorage = async () => {
+        setIsLoading(true)
         const program = await getProgram();
         const account = await program.account.baseAccount.fetch(baseAccount.publicKey)
         // @ts-ignore
         const walletAddressesOnStorage = await account.eventOrganizersVec.map((address: any) => address.toString())
         setAllWalletAddressesOnStorage(walletAddressesOnStorage)
-        console.log({ allWalletAddressesOnStorage })
+        // console.log({ allWalletAddressesOnStorage })
+        setIsLoading(false)
     }
 
 
-    const getAllToursForEachWallet = async () => {
+    const getAllNFTsForEachWallet = async () => {
+        setIsLoading(true)
         console.log('Getting all tours for each wallet...')
 
         const collectionAuthority = wallet?.adapter!
@@ -88,16 +94,41 @@ const ShowAllTours: FC = () => {
         let newSetOfCollectionNFTs: (Metadata<JsonMetadata<string>> | Nft | Sft)[] = []
         console.log({ newSetOfCollectionNFTs })
         for await (const address of allWalletAddressesOnStorage) {
-            console.log({ address })
+            // console.log({ address })
             const allCreatedNFTsForAddress = await metaplex.nfts().findAllByCreator({ creator: address! });
-            console.log({ allCreatedNFTsForAddress })
+            // console.log({ allCreatedNFTsForAddress })
             newSetOfCollectionNFTs = newSetOfCollectionNFTs.concat(allCreatedNFTsForAddress)
-            console.log({ newSetOfCollectionNFTs })
+            // console.log({ newSetOfCollectionNFTs })
 
         }
-        setAllCollectionNFTs(newSetOfCollectionNFTs)
+        setAllWalletNFTs(newSetOfCollectionNFTs)
+        setIsLoading(false)
+
+    }
 
 
+    // separate out tours based on symbols
+
+    const [tourSymbolsDirectory, setTourSymbolsDirectory] = useState([])
+
+    const getTourSymbolsDirectory = async () => {
+        setIsLoading(true)
+        const tourCollectionNFTs = allWalletNFTs.filter(walletNFT => walletNFT.collection === null)
+        console.log({ tourCollectionNFTs })
+        const newTourSymbolDirectory = tourCollectionNFTs
+            .map(tourCollectionNFT => {
+                return {
+                    tourSymbol: tourCollectionNFT.symbol,
+                    tourName: tourCollectionNFT.name,
+                    tourEvents: allWalletNFTs
+                        .filter(walletNFT => walletNFT.collection !== null && walletNFT.symbol === tourCollectionNFT.symbol)
+                }
+            })
+
+        // @ts-ignore
+        setTourSymbolsDirectory(newTourSymbolDirectory)
+        console.log({ tourSymbolsDirectory })
+        setIsLoading(false)
     }
 
     // TO-DO: Load all venues 
@@ -109,19 +140,29 @@ const ShowAllTours: FC = () => {
 
     useEffect(() => {
 
-        getAllToursForEachWallet()
+        getAllNFTsForEachWallet()
     }, [allWalletAddressesOnStorage])
 
     useEffect(() => {
 
-        console.log({ allCollectionNFTs })
-    }, [allCollectionNFTs])
+        // console.log({ allWalletNFTs })
+        getTourSymbolsDirectory()
+
+    }, [allWalletNFTs])
 
     return <>
         <div
             className="card"
         >
-            {allWalletAddressesOnStorage.map((address) => <p key={address}>{address}</p>)}
+            {/* {allWalletAddressesOnStorage.map((address) => <p key={address}>{address}</p>)} */}
+            <h2
+                className="m-3"
+            > <u>Tours we have tickets for</u> </h2>
+            {isLoading && <Loading />}
+            {
+                // @ts-ignore
+                tourSymbolsDirectory.map(tour => <TourTicketCounter key={tour.tourSymbol} tourDetails={tour} />)
+            }
         </div>
     </>
 }
