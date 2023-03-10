@@ -91,6 +91,7 @@ const TourCollections: FC = () => {
     const [eventLocation, setEventLocation] = useState('')
     const [eventDate, setEventDate] = useState('')
     const [eventCapacity, setEventCapacity] = useState('')
+    const [eventTicketPriceSOL, setEventTicketPriceSOL] = useState('')
     const [isCreatingEvent, setIsCreatingEvent] = useState(false)
 
     const handleCreateTourEventSubmit = async (event: FormEvent) => {
@@ -101,6 +102,7 @@ const TourCollections: FC = () => {
         console.log(eventLocation)
         console.log(eventDate)
         console.log(eventCapacity)
+        console.log(eventTicketPriceSOL)
 
         const eventName = `SFT / ${tourCollectionNFT.json.symbol} - ${eventLocation}`
         const eventSymbol = `${tourCollectionNFT.json.symbol}`
@@ -115,12 +117,18 @@ const TourCollections: FC = () => {
                 trait_type: "Event location",
                 value: `${eventLocation}`
             }, {
-                trait_type: "Event data",
+                trait_type: "Event date",
                 value: `${eventDate}`
             },
             {
                 trait_type: "Candy machine ID",
                 value: ""
+            }, {
+                trait_type: "Event ticket price in SOL",
+                value: `${eventTicketPriceSOL}`
+            }, {
+                trait_type: "Event capacity",
+                value: `${eventCapacity}`
             }
             ]
         }
@@ -144,12 +152,12 @@ const TourCollections: FC = () => {
 
         }
 
-        const { nft } = await metaplex
+        const { sft } = await metaplex
             .nfts()
-            .create(createEventSFTInput)
+            .createSft(createEventSFTInput)
 
         console.log(
-            `Token Mint: https://explorer.solana.com/address/${nft.address.toString()}?cluster=devnet`
+            `Token Mint: https://explorer.solana.com/address/${sft.address.toString()}?cluster=devnet`
         )
 
         setIsCreatingEvent(false)
@@ -258,7 +266,7 @@ const TourCollections: FC = () => {
                                 max="6500"
                                 className="form-control"
                                 id="eventCapacityNumberInput"
-                                aria-describedby="evnetCapacity"
+                                aria-describedby="eventCapacity"
                                 placeholder=""
                                 value={eventCapacity}
                                 onChange={e => setEventCapacity(e.target.value)}
@@ -274,9 +282,9 @@ const TourCollections: FC = () => {
                                 className="form-control"
                                 id="entryFeeTextInput"
                                 aria-describedby="entryFee"
-                                placeholder=""
-                                value={eventCapacity}
-                                onChange={e => setEventCapacity(e.target.value)}
+                                placeholder="1.5"
+                                value={eventTicketPriceSOL}
+                                onChange={e => setEventTicketPriceSOL(e.target.value)}
                             />
                         </div>
 
